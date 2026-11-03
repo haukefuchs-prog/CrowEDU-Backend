@@ -11,7 +11,7 @@ Für die Entwicklung werden benötigt:
 
 ---
 
-## Repository klonen
+## Schnellstart (Linux)
 
 ```bash
 git clone https://github.com/haukefuchs-prog/CrowEDU-Backend.git
