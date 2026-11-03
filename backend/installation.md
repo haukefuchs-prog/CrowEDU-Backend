@@ -15,7 +15,9 @@ Für die Entwicklung werden benötigt:
 
 ```bash
 git clone https://github.com/haukefuchs-prog/CrowEDU-Backend.git
-cd CrowEDU-Backend/backend
+python3 -m venv .venv
+pip install -r requirements.txt
+sudo systemctl start crowedu-backend
 ```
 
 ---
