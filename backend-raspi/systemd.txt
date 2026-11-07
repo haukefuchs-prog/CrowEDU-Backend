@@ -1,0 +1,18 @@
+sudo nano /etc/systemd/system/crowedu-api.service
+
+[Unit]
+Description=CrowEDU API
+After=network.target
+
+[Service]
+User=crowadmin
+WorkingDirectory=/home/crowadmin/crowedu
+ExecStart=/home/crowadmin/crowedu/venv/bin/python /home/crowadmin/crowedu/api.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+sudo systemctl daemon-reload
+sudo systemctl enable crowedu-api
+sudo systemctl start crowedu-api
