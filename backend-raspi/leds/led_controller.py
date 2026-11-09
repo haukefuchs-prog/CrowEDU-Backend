@@ -5,9 +5,6 @@ LED_GREEN = 16
 LED_YELLOW = 26
 LED_RED = 20
 
-current_led = "none"
-
-
 GPIO.setmode(GPIO.BCM)
 
 for pin in [LED_BLUE, LED_GREEN, LED_YELLOW, LED_RED]:
@@ -19,32 +16,26 @@ def all_off():
     for pin in [LED_BLUE, LED_GREEN, LED_YELLOW, LED_RED]:
         GPIO.output(pin, GPIO.HIGH)
 
-    current_led = "none"
-
 def green_on():
-    global current_led
-
-    all_off()
     GPIO.output(LED_GREEN, GPIO.LOW)
-    current_led = "green"
 
-def yellow_on():
-    global current_led
-
-    all_off()
-    GPIO.output(LED_YELLOW, GPIO.LOW)
-    current_led = "yellow"
-
-def red_on():
-    global current_led
-
-    all_off()
-    GPIO.output(LED_RED, GPIO.LOW)
-    current_led = "red"
+def green_off():
+    GPIO.output(LED_GREEN, GPIO.HIGH)
 
 def blue_on():
-    global current_led
-
-    all_off()
     GPIO.output(LED_BLUE, GPIO.LOW)
-    current_led = "blue"
+
+def blue_off():
+    GPIO.output(LED_BLUE, GPIO.HIGH)
+
+def red_on():
+    GPIO.output(LED_RED, GPIO.LOW)
+
+def red_off():
+    GPIO.output(LED_RED, GPIO.HIGH)
+
+def yellow_on():
+    GPIO.output(LED_YELLOW, GPIO.LOW)
+
+def yellow_off():
+    GPIO.output(LED_YELLOW, GPIO.HIGH)
