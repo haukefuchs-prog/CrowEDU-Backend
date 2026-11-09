@@ -23,6 +23,10 @@ import subprocess
 app = Flask(__name__)
 
 FW_VERSION = "1.0.0"
+NETWORK_TEST_HOST = "8.8.8.8"
+NETWORK_TEST_PORT = 53
+
+BACKEND_URL = "https://api.crowedu.de/api/v1/health"
 
 BOOT_TIME = datetime.now(
     ZoneInfo("Europe/Berlin")
@@ -73,6 +77,15 @@ def metrics():
 
         data = f"""temperature_celsius {round(temperature, 2)}
 humidity_percent {round(humidity, 2)}
+
+node_status "{NODE_STATUS}"
+network_test_host "{NETWORK_TEST_HOST}"
+network_test_port {NETWORK_TEST_PORT}
+network_status "{NETWORK_STATUS}"
+
+backend_url "{BACKEND_URL}"
+backend_status "{BACKEND_STATUS}"
+
 node_name "{socket.gethostname()}"
 fw_version "{FW_VERSION}"
 node_uptime_seconds {get_uptime_seconds()}
@@ -137,7 +150,7 @@ def network_available():
 def backend_available():
     try:
         response = requests.get(
-            "https://api.crowedu.de/api/v1/health",
+            BACKEND_URL,
             timeout=5
         )
 
@@ -170,6 +183,9 @@ def set_green_blue():
 
 def wait_for_network():
     """Rot + blinkendes Blau"""
+    global NETWORK_STATUS
+
+    NETWORK_STATUS = "disconnected"
 
     red_on()
 
@@ -186,17 +202,22 @@ def wait_for_network():
         state = not state
         time.sleep(0.5)
 
+    NETWORK_STATUS = "connected"
     set_red_blue()
 
 
 def wait_for_backend():
     """Rot + Blau bis Backend OK"""
+    global BACKEND_STATUS
+
+    BACKEND_STATUS = "disconnected"
 
     set_red_blue()
 
     while not backend_available():
         time.sleep(2)
 
+    BACKEND_STATUS = "connected"
     set_green_blue()
 
 def state_network_lost():
@@ -204,11 +225,23 @@ def state_network_lost():
     red_on()
 
 def state_backend_lost():
+
+    global NODE_STATUS
+    global BACKEND_STATUS
+
+    NODE_STATUS = "error"
+    BACKEND_STATUS = "disconnected"
+
     all_off()
     red_on()
     blue_on()
 
 def state_online():
+
+    global NODE_STATUS
+
+    NODE_STATUS = "online"
+
     all_off()
     green_on()
     blue_on()
