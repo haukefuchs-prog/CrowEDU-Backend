@@ -7,7 +7,7 @@ After=network.target
 [Service]
 User=crowadmin
 WorkingDirectory=/home/crowadmin/crowedu
-ExecStart=/home/crowadmin/crowedu/venv/bin/python /home/crowadmin/crowedu/api.py
+ExecStart=/home/crowadmin/CrowEDU-Backend/backend-raspi/venv/bin/python /home/crowadmin/CrowEDU-Backend/backend-raspi/api.py
 Restart=always
 
 [Install]

@@ -241,6 +241,7 @@ def state_online():
     global NODE_STATUS
 
     NODE_STATUS = "online"
+    BACKEND_STATUS = "connected"
 
     all_off()
     green_on()
@@ -274,6 +275,66 @@ def monitor_loop():
 
         time.sleep(1)
 
+def heartbeat_loop():
+
+    while True:
+
+        try:
+
+            requests.post(
+                "https://api.crowedu.de/api/v1/heartbeat",
+                json={
+                    "device_name": socket.gethostname()
+                },
+                timeout=5
+            )
+
+        except Exception as e:
+
+            print(f"Heartbeat-Fehler: {e}")
+
+        time.sleep(60)
+
+def measurement_loop():
+
+    while True:
+
+        try:
+
+            temperature, humidity = read_sensor()
+
+            response_temp = requests.post(
+                "https://api.crowedu.de/api/v1/measurements",
+                json={
+                    "sensor_id": 1,
+                    "value": round(temperature, 2)
+                },
+                timeout=5
+            )
+
+            response_hum = requests.post(
+                "https://api.crowedu.de/api/v1/measurements",
+                json={
+                    "sensor_id": 2,
+                    "value": round(humidity, 2)
+                },
+                timeout=5
+            )
+
+            print(
+                f"Messung gesendet: "
+                f"{temperature:.2f} °C, "
+                f"{humidity:.2f} %"
+            )
+
+            print(response_temp.json())
+            print(response_hum.json())
+
+        except Exception as e:
+
+            print(f"Messfehler: {e}")
+
+        time.sleep(30)
 
 if __name__ == "__main__":
 
@@ -291,6 +352,16 @@ if __name__ == "__main__":
 
     threading.Thread(
         target=monitor_loop,
+        daemon=True
+    ).start()
+
+    threading.Thread(
+        target=measurement_loop,
+        daemon=True
+    ).start()
+
+    threading.Thread(
+        target=heartbeat_loop,
         daemon=True
     ).start()
 
