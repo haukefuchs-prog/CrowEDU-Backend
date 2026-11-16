@@ -74,3 +74,25 @@ def create_sensor(
     conn.close()
 
     return sensor_id
+
+def get_sensor_by_id(
+    sensor_id
+):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM sensors
+        WHERE sensor_id = %s
+        """,
+        (sensor_id,)
+    )
+
+    sensor = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    return sensor

@@ -264,3 +264,88 @@ Ereignisse
 [✓] Raspberry arbeitet als Collector/Aktor
 [✓] HTTPS als Kommunikationsweg
 [✓] API-Versionierung mit /api/v1/
+
+==================================================
+12. EVENT ENGINE (V1)
+==================================================
+
+Die Event Engine bewertet Zustandsänderungen.
+
+Die Event Engine erzeugt:
+
+- Logs
+- Warnings
+- Dashboard-Ereignisse
+
+Die Event Engine verarbeitet keine GPIOs
+und keine Benutzereingaben.
+
+Die Event Engine arbeitet ausschließlich
+auf den vom Backend gespeicherten Zuständen.
+
+Beispiele:
+
+backend_status
+connected -> disconnected
+
+=> WARNING
+=> Log erzeugen
+=> Warning erzeugen
+
+----------------------------------
+
+network_status
+connected -> disconnected
+
+=> WARNING
+=> Log erzeugen
+=> Warning erzeugen
+
+----------------------------------
+
+node_uptime_seconds
+10000 -> 42
+
+=> INFO
+=> Log erzeugen
+
+----------------------------------
+
+last_seen
+Timeout überschritten
+
+=> ALARM
+=> Log erzeugen
+=> Warning erzeugen
+
+==================================================
+13. ZUKUNFTSSICHERHEIT
+==================================================
+
+Warnungstexte dürfen zukünftig nicht
+hart im Code gespeichert werden.
+
+Schwellwerte dürfen zukünftig nicht
+hart im Code gespeichert werden.
+
+Langfristiges Ziel:
+
+- Warning Templates
+- Ereignisdefinitionen
+- Schwellwerte
+- Konfigurationswerte
+
+werden über Datenbanktabellen
+und ein Admin-Tool verwaltet.
+
+Die Event Engine soll deshalb
+mit Ereigniscodes arbeiten.
+
+Beispiele:
+
+NODE_OFFLINE
+NODE_REBOOTED
+NETWORK_DISCONNECTED
+BACKEND_DISCONNECTED
+TEMPERATURE_WARNING
+TEMPERATURE_CRITICAL
