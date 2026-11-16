@@ -1,4 +1,3 @@
-from sqlite3.dbapi2 import Timestamp
 from flask import Flask, Response
 from sensors.sht31 import read_sensor
 from leds.led_controller import (
@@ -12,9 +11,7 @@ from leds.led_controller import (
 import time
 import requests
 import threading
-
-import leds.led_controller as leds
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import socket
@@ -22,7 +19,7 @@ import subprocess
 
 app = Flask(__name__)
 
-FW_VERSION = "1.0.0"
+FW_VERSION = "1.0.1"
 NETWORK_TEST_HOST = "8.8.8.8"
 NETWORK_TEST_PORT = 53
 
@@ -32,7 +29,14 @@ BOOT_TIME = datetime.now(
     ZoneInfo("Europe/Berlin")
 )
 
-LAST_REBOOT = BOOT_TIME.isoformat()
+LAST_REBOOT = BOOT_TIME.strftime(
+    "%Y-%m-%d %H:%M:%S"
+)
+NODE_STATUS = "starting"
+NETWORK_STATUS = "unknown"
+BACKEND_STATUS = "unknown"
+
+SENSOR_STATUS = "unknown"
 
 
 def get_uptime_seconds():
@@ -148,21 +152,27 @@ def network_available():
 
 
 def backend_available():
+
     try:
+
         response = requests.get(
             BACKEND_URL,
             timeout=5
         )
 
         if response.status_code == 200:
+
             data = response.json()
+
             return data.get("status") == "ok"
 
         return False
 
-    except Exception:
-        return False
+    except Exception as e:
 
+        print("BACKEND ERROR:", e)
+
+        return False
 
 def set_red():
     all_off()
@@ -226,10 +236,8 @@ def state_network_lost():
 
 def state_backend_lost():
 
-    global NODE_STATUS
     global BACKEND_STATUS
 
-    NODE_STATUS = "error"
     BACKEND_STATUS = "disconnected"
 
     all_off()
@@ -239,6 +247,7 @@ def state_backend_lost():
 def state_online():
 
     global NODE_STATUS
+    global BACKEND_STATUS
 
     NODE_STATUS = "online"
     BACKEND_STATUS = "connected"
@@ -247,19 +256,35 @@ def state_online():
     green_on()
     blue_on()
 
+def state_sensor_lost():
+
+    global SENSOR_STATUS
+
+    SENSOR_STATUS = "error"
+
+    all_off()
+    red_on()
+
 def monitor_loop():
 
     blink_state = False
 
     while True:
 
-        if not network_available():
+        if SENSOR_STATUS == "error":
+
+            state_sensor_lost()
+
+        elif not network_available():
 
             if blink_state:
+
                 all_off()
                 red_on()
                 blue_on()
+
             else:
+
                 all_off()
                 red_on()
 
@@ -295,13 +320,52 @@ def heartbeat_loop():
 
         time.sleep(60)
 
+def telemetry_loop():
+
+    while True:
+
+        try:
+
+            response = requests.post(
+                "https://api.crowedu.de/api/v1/telemetry",
+                json={
+                    "serial_number": "crowedu-raspi",
+                    "node_status": NODE_STATUS,
+                    "network_status": NETWORK_STATUS,
+                    "backend_status": BACKEND_STATUS,
+                    "sensor_status": SENSOR_STATUS,
+                    "fw_version": FW_VERSION,
+                    "node_uptime_seconds": get_uptime_seconds(),
+                    "last_reboot": LAST_REBOOT
+                },
+                timeout=5
+            )
+
+            print(
+                "Telemetry:",
+                response.status_code,
+                response.text
+            )
+
+        except Exception as e:
+
+            print(
+                f"Telemetry-Fehler: {e}"
+            )
+
+        time.sleep(60)
+
 def measurement_loop():
+
+    global SENSOR_STATUS
 
     while True:
 
         try:
 
             temperature, humidity = read_sensor()
+
+            SENSOR_STATUS = "online"
 
             response_temp = requests.post(
                 "https://api.crowedu.de/api/v1/measurements",
@@ -321,18 +385,9 @@ def measurement_loop():
                 timeout=5
             )
 
-            print(
-                f"Messung gesendet: "
-                f"{temperature:.2f} °C, "
-                f"{humidity:.2f} %"
-            )
+        except Exception:
 
-            print(response_temp.json())
-            print(response_hum.json())
-
-        except Exception as e:
-
-            print(f"Messfehler: {e}")
+            SENSOR_STATUS = "error"
 
         time.sleep(30)
 
@@ -351,9 +406,18 @@ if __name__ == "__main__":
     print("Node online.")
 
     threading.Thread(
-        target=monitor_loop,
+        target=telemetry_loop,
         daemon=True
     ).start()
+
+    try:
+        threading.Thread(
+            target=monitor_loop,
+            daemon=True
+        ).start()
+
+    except Exception as e:
+        print("Monitor-Thread Fehler:", e)
 
     threading.Thread(
         target=measurement_loop,
