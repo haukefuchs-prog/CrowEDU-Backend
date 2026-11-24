@@ -38,6 +38,8 @@ BACKEND_STATUS = "unknown"
 
 SENSOR_STATUS = "unknown"
 
+WARNING_ACTIVE = False
+
 
 def get_uptime_seconds():
     return int(
@@ -248,13 +250,18 @@ def state_online():
 
     global NODE_STATUS
     global BACKEND_STATUS
+    global WARNING_ACTIVE
 
     NODE_STATUS = "online"
     BACKEND_STATUS = "connected"
 
     all_off()
+
     green_on()
     blue_on()
+
+    if WARNING_ACTIVE:
+        yellow_on()
 
 def state_sensor_lost():
 
@@ -321,6 +328,7 @@ def heartbeat_loop():
         time.sleep(60)
 
 def telemetry_loop():
+    global WARNING_ACTIVE
 
     while True:
 
@@ -341,10 +349,16 @@ def telemetry_loop():
                 timeout=5
             )
 
+            data = response.json()
+
+            WARNING_ACTIVE = data.get(
+                "warning_active",
+                False
+            )
+
             print(
-                "Telemetry:",
-                response.status_code,
-                response.text
+                "Warning active:",
+                WARNING_ACTIVE
             )
 
         except Exception as e:
