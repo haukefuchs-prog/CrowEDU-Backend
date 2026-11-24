@@ -13,6 +13,7 @@ from routes.logs import logs_bp
 from routes.telemetry import (
     telemetry_bp
 )
+from routes.warnings import warnings_bp
 
 import threading
 import time
@@ -20,6 +21,8 @@ import time
 from services.event_engine import (
     check_offline_devices
 )
+
+
 
 app = Flask(__name__)
 
@@ -62,6 +65,11 @@ app.register_blueprint(
 
 app.register_blueprint(
     telemetry_bp,
+    url_prefix="/api/v1"
+)
+
+app.register_blueprint(
+    warnings_bp,
     url_prefix="/api/v1"
 )
 

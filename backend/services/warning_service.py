@@ -6,9 +6,12 @@ from repositories.log_repository import (
 from repositories.warning_repository import (
     create_warning,
     get_active_warning,
-    resolve_warning
+    resolve_warning,
+    get_active_warnings
 )
 
+def get_warnings():
+    return get_active_warnings()
 
 def trigger_warning(
     device_id,
@@ -16,23 +19,33 @@ def trigger_warning(
     level_name,
     message
 ):
+
+    print(f"WARNING: {message}")
+
     active_warning = get_active_warning(
         device_id,
         message
     )
 
+    print("active_warning =", active_warning)
+
     if active_warning:
+        print("WARNING existiert bereits")
         return False
 
     level = get_warning_level_by_name(
         level_name
     )
 
+    print("level =", level)
+
     create_log(
         device_id,
         level["warning_level_id"],
         message
     )
+
+    print("log geschrieben")
 
     create_warning(
         device_id,
@@ -41,7 +54,10 @@ def trigger_warning(
         message
     )
 
+    print("warning geschrieben")
+
     return True
+
 
 def clear_warning(
     device_id,

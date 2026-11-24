@@ -12,6 +12,10 @@ from repositories.log_repository import (
     get_warning_level_by_name
 )
 
+from repositories.warning_repository import (
+    has_active_warnings
+)
+
 def register_telemetry(data):
 
     device = get_device_by_serial(
@@ -42,5 +46,8 @@ def register_telemetry(data):
     )
 
     return {
-        "success": True
+        "success": True,
+        "warning_active": has_active_warnings(
+            device["device_id"]
+        )
     }

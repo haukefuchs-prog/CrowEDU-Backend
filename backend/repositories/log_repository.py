@@ -83,3 +83,27 @@ def get_online_devices():
     conn.close()
 
     return result
+
+def get_recent_logs(limit=20):
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT
+            message,
+            created_at
+        FROM logs
+        ORDER BY created_at DESC
+        LIMIT %s
+        """,
+        (limit,)
+    )
+
+    result = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return result

@@ -4,9 +4,12 @@ from repositories.device_repository import (
 
 from repositories.log_repository import (
     create_log,
-    get_warning_level_by_name
+    get_warning_level_by_name,
+    get_recent_logs
 )
 
+def get_logs():
+    return get_recent_logs()
 
 def create_log_entry(data):
 

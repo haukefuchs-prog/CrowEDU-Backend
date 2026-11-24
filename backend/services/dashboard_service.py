@@ -11,6 +11,10 @@ from repositories.device_repository import (
     get_primary_device
 )
 
+from repositories.warning_repository import (
+    get_active_warning_count
+)
+
 def get_history():
 
     return {
@@ -30,7 +34,7 @@ def get_dashboard():
         "nodes_total": get_node_count(),
         "sensors_online": get_online_sensor_count(),
         "sensors_total": get_sensor_count(),
-        "warnings": 0,
+        "warnings": get_active_warning_count(),
 
         "node_status": device["node_status"],
         "network_status": device["network_status"],
