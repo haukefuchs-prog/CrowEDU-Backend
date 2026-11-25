@@ -19,9 +19,10 @@ import subprocess
 
 app = Flask(__name__)
 
-FW_VERSION = "1.0.1"
+FW_VERSION = "RP_20261125"
 NETWORK_TEST_HOST = "8.8.8.8"
 NETWORK_TEST_PORT = 53
+
 
 BACKEND_URL = "https://api.crowedu.de/api/v1/health"
 
@@ -40,6 +41,18 @@ SENSOR_STATUS = "unknown"
 
 WARNING_ACTIVE = False
 
+def get_serial_number():
+    try:
+        with open("/proc/cpuinfo", "r") as f:
+            for line in f:
+                if line.startswith("Serial"):
+                    return line.split(":")[1].strip()
+    except Exception:
+        return "unknown"
+
+    return "unknown"
+
+SERIAL_NUMBER = get_serial_number()
 
 def get_uptime_seconds():
     return int(
@@ -92,6 +105,7 @@ network_status "{NETWORK_STATUS}"
 backend_url "{BACKEND_URL}"
 backend_status "{BACKEND_STATUS}"
 
+serial_number "{SERIAL_NUMBER}"
 node_name "{socket.gethostname()}"
 fw_version "{FW_VERSION}"
 node_uptime_seconds {get_uptime_seconds()}
@@ -329,7 +343,7 @@ def heartbeat_loop():
 
 def telemetry_loop():
     global WARNING_ACTIVE
-
+    
     while True:
 
         try:
@@ -337,7 +351,8 @@ def telemetry_loop():
             response = requests.post(
                 "https://api.crowedu.de/api/v1/telemetry",
                 json={
-                    "serial_number": "crowedu-raspi",
+                    "serial_number": SERIAL_NUMBER,
+                    "node_name": socket.gethostname(),
                     "node_status": NODE_STATUS,
                     "network_status": NETWORK_STATUS,
                     "backend_status": BACKEND_STATUS,
