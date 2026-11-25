@@ -175,3 +175,35 @@ def has_active_warnings(device_id):
     conn.close()
 
     return result[0] > 0
+
+def resolve_warnings_by_message(
+    device_id,
+    message
+):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE warnings
+        SET
+            active = 0,
+            resolved_at = NOW()
+        WHERE device_id = %s
+        AND message = %s
+        AND active = 1
+        """,
+        (
+            device_id,
+            message
+        )
+    )
+
+    affected_rows = cursor.rowcount
+
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    return affected_rows

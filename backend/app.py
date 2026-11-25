@@ -22,8 +22,6 @@ from services.event_engine import (
     check_offline_devices
 )
 
-
-
 app = Flask(__name__)
 
 CORS(app)

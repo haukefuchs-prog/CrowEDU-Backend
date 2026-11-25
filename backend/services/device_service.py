@@ -1,7 +1,9 @@
 from repositories.device_repository import (
     get_device_by_serial,
     create_device,
-    update_last_seen
+    update_last_seen,
+    get_device
+
 )
 
 def register_device(data):
@@ -35,3 +37,16 @@ def register_device(data):
         "success": True,
         "device_id": device_id
     }
+
+def get_device_details(device_id):
+
+    device = get_device(device_id)
+
+    if not device:
+
+        return {
+            "success": False,
+            "message": "Device not found"
+        }
+
+    return device

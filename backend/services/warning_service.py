@@ -7,6 +7,7 @@ from repositories.warning_repository import (
     create_warning,
     get_active_warning,
     resolve_warning,
+    resolve_warnings_by_message,
     get_active_warnings
 )
 
@@ -75,6 +76,31 @@ def clear_warning(
     resolve_warning(
         active_warning["warning_id"]
     )
+
+    level = get_warning_level_by_name(
+        "INFO"
+    )
+
+    create_log(
+        device_id,
+        level["warning_level_id"],
+        resolved_message
+    )
+
+    return True
+
+def clear_warning(
+    device_id,
+    warning_message,
+    resolved_message
+):
+    affected_rows = resolve_warnings_by_message(
+        device_id,
+        warning_message
+    )
+
+    if affected_rows == 0:
+        return False
 
     level = get_warning_level_by_name(
         "INFO"

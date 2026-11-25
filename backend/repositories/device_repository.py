@@ -209,3 +209,38 @@ def update_node_status(
 
     cursor.close()
     conn.close()
+
+def get_device(device_id):
+
+    conn = get_connection()
+
+    cursor = conn.cursor(
+        dictionary=True
+    )
+
+    cursor.execute(
+        """
+        SELECT
+            device_id,
+            name,
+            serial_number,
+            node_status,
+            network_status,
+            backend_status,
+            sensor_status,
+            fw_version,
+            node_uptime_seconds,
+            last_reboot,
+            last_seen
+        FROM devices
+        WHERE device_id = %s
+        """,
+        (device_id,)
+    )
+
+    result = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    return result
