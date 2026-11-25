@@ -1,0 +1,13 @@
+Idee:
+Provisionierung neuer Geräte
+
+- Rolle beim Onboarding übergeben
+oder
+- Standardrolle "unassigned"
+
+LED-Muster:
+🟢🟡🔵 blinkend
+
+Bedeutung:
+Gerät registriert,
+wartet auf Rollenzuweisung
